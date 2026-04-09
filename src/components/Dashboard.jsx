@@ -54,7 +54,8 @@ export default function Dashboard({ onLogout }) {
               <span>{brand.name}</span>
             </div>
           </div>
-          <nav className="dashboard-tabs">
+        </div>
+        <nav className="dashboard-tabs">
             {tabs.map(tab => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
@@ -74,7 +75,6 @@ export default function Dashboard({ onLogout }) {
               )
             })}
           </nav>
-        </div>
         <div className="dashboard-header-actions">
           <button
             className="btn-icon"
