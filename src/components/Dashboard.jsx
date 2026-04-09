@@ -3,19 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { useBrand } from '../context/BrandContext'
 import Sidebar from './Sidebar'
 import Overview from './tabs/Overview'
-import Analytics from './tabs/Analytics'
+import AIChat from './tabs/AIChat'
 import SearchTab from './tabs/Search'
 import { Sun, Moon, LogOut, Settings } from 'lucide-react'
 
 const tabComponents = {
   overview: Overview,
-  analytics: Analytics,
+  aichat: AIChat,
   search: SearchTab,
 }
 
 const tabTitles = {
   overview: 'Overview',
-  analytics: 'Analytics',
+  aichat: 'AI Chat',
   search: 'Dashboard',
 }
 

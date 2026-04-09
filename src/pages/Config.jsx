@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBrand } from '../context/BrandContext'
 import { generatePalette } from '../utils/colors'
-import { ArrowLeft, Search, Loader2, CheckCircle2, ExternalLink, Palette, MonitorDot } from 'lucide-react'
+import { ArrowLeft, Search, Loader2, CheckCircle2, ExternalLink, Palette, MonitorDot, MessageCircle } from 'lucide-react'
 
 export default function Config() {
   const navigate = useNavigate()
@@ -253,6 +253,36 @@ export default function Config() {
               <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 12 }}>
                 Omni requires a signed embed URL. Contact your Omni admin to enable embedding and generate a secret.
                 Without a secret, the Dashboard tab will show a placeholder.
+              </p>
+            </div>
+
+            <div className="config-section">
+              <h3><MessageCircle size={18} /> AI Chat Settings</h3>
+              <div className="config-grid">
+                <div className="config-field full-width">
+                  <label>Connection ID (from Omni Settings → Connections → select connection → Settings tab)</label>
+                  <input
+                    type="text"
+                    value={editData.aiConnectionId || ''}
+                    onChange={e => updateField('aiConnectionId', e.target.value)}
+                    placeholder="e.g. c0f12353-4817-4398-bcc0-d501e6dd2f64"
+                  />
+                </div>
+                <div className="config-field full-width">
+                  <label>Connection Role</label>
+                  <select
+                    value={editData.aiConnectionRole || 'RESTRICTED_QUERIER'}
+                    onChange={e => updateField('aiConnectionRole', e.target.value)}
+                    style={{ padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  >
+                    <option value="RESTRICTED_QUERIER">RESTRICTED_QUERIER (recommended)</option>
+                    <option value="QUERIER">QUERIER</option>
+                    <option value="VIEWER">VIEWER</option>
+                  </select>
+                </div>
+              </div>
+              <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 12 }}>
+                The AI Chat tab embeds Omni's AI agent. It requires an Embed Secret (above) and a Connection ID to query data.
               </p>
             </div>
 

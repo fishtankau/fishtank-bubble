@@ -1,13 +1,13 @@
 import { useBrand } from '../context/BrandContext'
 import { generatePalette, getContrastColor } from '../utils/colors'
 import {
-  LayoutDashboard, BarChart3, MonitorDot,
+  LayoutDashboard, MessageCircle, MonitorDot,
   Sparkles
 } from 'lucide-react'
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  { id: 'aichat', label: 'AI Chat', icon: MessageCircle },
   { id: 'search', label: 'Dashboard', icon: MonitorDot },
 ]
 

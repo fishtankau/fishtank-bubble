@@ -17,6 +17,8 @@ const defaultBrand = {
   embedVanityDomain: '',
   embedDashboardPath: '/dashboards/d33cc8c2',
   embedThemeId: '',
+  aiConnectionId: '',
+  aiConnectionRole: 'RESTRICTED_QUERIER',
 }
 
 export function BrandProvider({ children }) {
