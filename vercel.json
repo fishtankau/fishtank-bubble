@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/scrape", "destination": "/api/scrape" },
+    { "source": "/api/proxy-image", "destination": "/api/proxy-image" },
+    { "source": "/api/omni-embed-url", "destination": "/api/omni-embed-url" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
