@@ -1,9 +1,9 @@
 import { useBrand } from '../../context/BrandContext'
 import { generatePalette, getContrastColor } from '../../utils/colors'
 import {
-  ExternalLink, ArrowRight, Sparkles, Star, Zap, Gem,
+  ExternalLink, ArrowRight, Sparkles, Star, Zap,
   Heart, Shield, Users, Target, Award, Lightbulb,
-  Building2, Globe, TrendingUp, ChevronRight
+  Globe, TrendingUp
 } from 'lucide-react'
 
 function FloatingSparkle({ style, size = 16, delay = 0, color }) {
@@ -79,70 +79,6 @@ export default function Overview() {
         <div className="hero-orb hero-orb-2" style={{ background: palette.primaryLight }} />
         <div className="hero-orb hero-orb-3" style={{ background: brand.primaryColor }} />
       </div>
-
-      {/* About Section */}
-      <div className="homepage-about">
-        <div className="about-content">
-          <div className="about-text">
-            <div className="section-eyebrow" style={{ color: brand.primaryColor }}>
-              <Building2 size={16} /> Who We Are
-            </div>
-            <h2 className="homepage-section-title">About {brand.name}</h2>
-            <p className="about-description">
-              {brand.description || `${brand.name} is a leading organization committed to delivering exceptional value and innovative solutions to customers worldwide.`}
-            </p>
-            {brand.url && (
-              <a href={brand.url} target="_blank" rel="noopener noreferrer" className="about-link" style={{ color: brand.primaryColor }}>
-                Learn more about us <ChevronRight size={16} />
-              </a>
-            )}
-          </div>
-          <div className="about-visual" style={{ background: `linear-gradient(135deg, ${palette.primarySoft}, ${brand.primaryColor}15)` }}>
-            {logoSrc ? (
-              <img src={logoSrc} alt={brand.name} className="about-logo-img" onError={e => { e.target.style.display = 'none' }} />
-            ) : (
-              <div className="about-logo-placeholder" style={{ color: brand.primaryColor }}>
-                <Building2 size={48} />
-                <span>{brand.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Our Strategy / Mission */}
-      {hasMessages && (
-        <div className="homepage-strategy" style={{ background: brand.secondaryColor }}>
-          <div className="strategy-content">
-            <div className="strategy-text">
-              <div className="section-eyebrow" style={{ color: brand.primaryColor }}>
-                <Target size={16} /> Our Strategy
-              </div>
-              <h2 className="homepage-section-title" style={{ color: '#fff' }}>
-                {brand.keyMessages?.[1] || 'Our Mission & Vision'}
-              </h2>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, lineHeight: 1.7 }}>
-                {brand.description || `At ${brand.name}, we are committed to driving innovation and delivering value through our products and services.`}
-              </p>
-              <a href={brand.url} target="_blank" rel="noopener noreferrer"
-                className="strategy-btn"
-                style={{ background: brand.primaryColor, color: heroBtnText }}>
-                Learn More <ArrowRight size={16} />
-              </a>
-            </div>
-            <div className="strategy-visual">
-              <div className="strategy-circle" style={{ borderColor: brand.primaryColor }}>
-                <div className="strategy-circle-inner" style={{ background: `linear-gradient(135deg, ${brand.primaryColor}, ${palette.primaryDark})` }}>
-                  <Globe size={36} style={{ color: '#fff' }} />
-                  <span style={{ color: '#fff', fontSize: 13, fontWeight: 600, textAlign: 'center', lineHeight: 1.3 }}>
-                    {brand.keyMessages?.[2]?.split(' ').slice(0, 4).join(' ') || brand.name}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Our Values */}
       {hasMessages && brand.keyMessages.length > 1 && (
