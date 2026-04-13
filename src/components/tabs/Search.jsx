@@ -26,6 +26,11 @@ export default function SearchTab() {
       'dashboard-tile-title-text-color': brand.secondaryColor,
     }
 
+    // Build connectionRoles if AI connection is configured (enables Dashboard Agent)
+    const connectionRoles = brand.aiConnectionId
+      ? JSON.stringify({ [brand.aiConnectionId]: brand.aiConnectionRole || 'RESTRICTED_QUERIER' })
+      : undefined
+
     fetch('/api/omni-embed-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -35,6 +40,8 @@ export default function SearchTab() {
         vanityDomain: brand.embedVanityDomain || '',
         customTheme: brand.embedThemeId ? undefined : customTheme,
         customThemeId: brand.embedThemeId || undefined,
+        connectionRoles,
+        linkAccess: '__omni_link_access_open',
       })
     })
       .then(res => res.json())

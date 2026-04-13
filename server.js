@@ -194,7 +194,7 @@ app.get('/api/proxy-image', async (req, res) => {
 // Generate Omni embed signed URL via Omni's API
 app.post('/api/omni-embed-url', async (req, res) => {
   try {
-    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode } = req.body;
+    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess } = req.body;
     if (!secret || !contentPath) {
       return res.status(400).json({ error: 'secret and contentPath are required' });
     }
@@ -219,6 +219,7 @@ app.post('/api/omni-embed-url', async (req, res) => {
     if (prefersDark) payload.prefersDark = prefersDark;
     if (connectionRoles) payload.connectionRoles = typeof connectionRoles === 'string' ? connectionRoles : JSON.stringify(connectionRoles);
     if (mode) payload.mode = mode;
+    if (linkAccess) payload.linkAccess = linkAccess;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
