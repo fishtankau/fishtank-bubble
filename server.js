@@ -248,9 +248,10 @@ app.post('/api/omni-dashboards', async (req, res) => {
     if (!apiKey) return res.status(400).json({ error: 'apiKey is required' });
 
     const omniHost = vanityDomain || 'trial.omniapp.co';
+    const headers = { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' };
+
     const response = await fetch(`https://${omniHost}/api/v1/content?path=/&pageSize=100`, {
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(10000),
+      headers, signal: AbortSignal.timeout(10000),
     });
 
     if (!response.ok) {

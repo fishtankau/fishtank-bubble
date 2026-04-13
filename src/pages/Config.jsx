@@ -94,13 +94,11 @@ export default function Config() {
       // Extract dashboard items from content response
       const contentItems = dashData.records || dashData.content || dashData || []
       const dashList = (Array.isArray(contentItems) ? contentItems : [])
-        .filter(item => item.type === 'document' || item.contentPath?.startsWith('/dashboards'))
+        .filter(item => item.type === 'document' || item.contentPath?.startsWith('/dashboards') || item.contentPath?.startsWith('/workbooks'))
         .map(item => ({
-          id: item.id,
+          id: item.id || item.identifier,
           name: item.name || item.title || item.id,
           contentPath: item.contentPath || `/dashboards/${item.identifier || item.id}`,
-          customThemeId: item.customThemeId || item.themeId || '',
-          updatedAt: item.updatedAt || '',
         }))
 
       // Extract connections
@@ -139,11 +137,6 @@ export default function Config() {
 
   const handleDashboardSelect = (contentPath) => {
     updateField('embedDashboardPath', contentPath)
-    // Auto-fill theme ID if dashboard has one
-    const selected = dashboards.find(d => d.contentPath === contentPath)
-    if (selected?.customThemeId) {
-      updateField('embedThemeId', selected.customThemeId)
-    }
   }
 
   const handleConnectionSelect = (connId) => {
@@ -384,13 +377,30 @@ export default function Config() {
                   )}
                 </div>
                 <div className="config-field full-width">
-                  <label>Custom Theme ID (optional — from Omni Settings → Themes)</label>
-                  <input
-                    type="text"
-                    value={editData.embedThemeId || ''}
-                    onChange={e => updateField('embedThemeId', e.target.value)}
-                    placeholder="e.g. abcdefgh-ijkl-mnop-qrst-123456789123"
-                  />
+                  <label>Custom Theme ID (optional)</label>
+                  <div className="config-input-row">
+                    <input
+                      type="text"
+                      value={editData.embedThemeId || ''}
+                      onChange={e => updateField('embedThemeId', e.target.value)}
+                      placeholder="Paste theme ID from Omni"
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none' }}
+                    />
+                    {editData.embedDashboardPath && (
+                      <a
+                        href={`https://${editData.embedVanityDomain || 'trial.omniapp.co'}${editData.embedDashboardPath}/themes`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                        style={{ whiteSpace: 'nowrap', textDecoration: 'none' }}
+                      >
+                        <ExternalLink size={14} /> Open Themes
+                      </a>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 11, color: '#94a3b8', marginTop: 4, lineHeight: 1.5 }}>
+                    Omni doesn't expose themes via API. Click "Open Themes" → select a theme → copy the ID from the URL.
+                  </span>
                 </div>
               </div>
               <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12 }}>
