@@ -241,5 +241,55 @@ app.post('/api/omni-embed-url', async (req, res) => {
   }
 });
 
+// Fetch Omni dashboards/content list
+app.post('/api/omni-dashboards', async (req, res) => {
+  try {
+    const { apiKey, vanityDomain } = req.body;
+    if (!apiKey) return res.status(400).json({ error: 'apiKey is required' });
+
+    const omniHost = vanityDomain || 'trial.omniapp.co';
+    const response = await fetch(`https://${omniHost}/api/v1/content?path=/&pageSize=100`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err.message || err.error || 'Failed to fetch dashboards' });
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Omni dashboards error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch dashboards: ' + err.message });
+  }
+});
+
+// Fetch Omni connections list
+app.post('/api/omni-connections', async (req, res) => {
+  try {
+    const { apiKey, vanityDomain } = req.body;
+    if (!apiKey) return res.status(400).json({ error: 'apiKey is required' });
+
+    const omniHost = vanityDomain || 'trial.omniapp.co';
+    const response = await fetch(`https://${omniHost}/api/v1/connections?sortField=name&sortDirection=asc`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err.message || err.error || 'Failed to fetch connections' });
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Omni connections error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch connections: ' + err.message });
+  }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

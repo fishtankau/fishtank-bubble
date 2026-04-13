@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBrand } from '../context/BrandContext'
 import { generatePalette } from '../utils/colors'
-import { ArrowLeft, Search, Loader2, CheckCircle2, ExternalLink, Palette, MonitorDot, MessageCircle } from 'lucide-react'
+import {
+  ArrowLeft, Search, Loader2, CheckCircle2, ExternalLink,
+  Palette, MonitorDot, MessageCircle, Key, RefreshCw
+} from 'lucide-react'
 
 export default function Config() {
   const navigate = useNavigate()
@@ -12,6 +15,13 @@ export default function Config() {
   const [error, setError] = useState('')
   const [scanned, setScanned] = useState(brand.configured)
   const [editData, setEditData] = useState(brand.configured ? { ...brand } : null)
+
+  // Omni API fetch state
+  const [omniLoading, setOmniLoading] = useState(false)
+  const [omniError, setOmniError] = useState('')
+  const [dashboards, setDashboards] = useState([])
+  const [connections, setConnections] = useState([])
+  const [omniFetched, setOmniFetched] = useState(false)
 
   const handleScan = async () => {
     if (!url.trim()) return
@@ -32,7 +42,6 @@ export default function Config() {
       setScanned(true)
     } catch (err) {
       setError(err.message)
-      // Provide defaults on error so user can still configure manually
       setEditData({
         name: 'My Brand',
         url: url.trim(),
@@ -49,6 +58,75 @@ export default function Config() {
     }
   }
 
+  const fetchOmniData = useCallback(async () => {
+    const apiKey = editData?.omniApiKey
+    const vanityDomain = editData?.embedVanityDomain
+    if (!apiKey) {
+      setOmniError('Enter an Omni API key first')
+      return
+    }
+
+    setOmniLoading(true)
+    setOmniError('')
+    setDashboards([])
+    setConnections([])
+
+    try {
+      const [dashRes, connRes] = await Promise.all([
+        fetch('/api/omni-dashboards', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey, vanityDomain })
+        }),
+        fetch('/api/omni-connections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey, vanityDomain })
+        })
+      ])
+
+      const dashData = await dashRes.json()
+      const connData = await connRes.json()
+
+      if (!dashRes.ok) throw new Error(dashData.error || 'Failed to fetch dashboards')
+      if (!connRes.ok) throw new Error(connData.error || 'Failed to fetch connections')
+
+      // Extract dashboard items from content response
+      const contentItems = dashData.records || dashData.content || dashData || []
+      const dashList = (Array.isArray(contentItems) ? contentItems : [])
+        .filter(item => item.type === 'document' || item.contentPath?.startsWith('/dashboards'))
+        .map(item => ({
+          id: item.id,
+          name: item.name || item.title || item.id,
+          contentPath: item.contentPath || `/dashboards/${item.identifier || item.id}`,
+          customThemeId: item.customThemeId || item.themeId || '',
+          updatedAt: item.updatedAt || '',
+        }))
+
+      // Extract connections
+      const connList = (connData.connections || connData.records || connData || [])
+        .map(conn => ({
+          id: conn.id,
+          name: conn.name || conn.id,
+          dialect: conn.dialect || '',
+          database: conn.database || '',
+        }))
+
+      setDashboards(dashList)
+      setConnections(connList)
+      setOmniFetched(true)
+
+      // Auto-select first dashboard if none selected
+      if (dashList.length > 0 && !editData.embedDashboardPath) {
+        updateField('embedDashboardPath', dashList[0].contentPath)
+      }
+    } catch (err) {
+      setOmniError(err.message)
+    } finally {
+      setOmniLoading(false)
+    }
+  }, [editData?.omniApiKey, editData?.embedVanityDomain])
+
   const handleSave = () => {
     if (!editData) return
     updateBrand(editData)
@@ -57,6 +135,19 @@ export default function Config() {
 
   const updateField = (field, value) => {
     setEditData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleDashboardSelect = (contentPath) => {
+    updateField('embedDashboardPath', contentPath)
+    // Auto-fill theme ID if dashboard has one
+    const selected = dashboards.find(d => d.contentPath === contentPath)
+    if (selected?.customThemeId) {
+      updateField('embedThemeId', selected.customThemeId)
+    }
+  }
+
+  const handleConnectionSelect = (connId) => {
+    updateField('aiConnectionId', connId)
   }
 
   const palette = editData ? generatePalette(editData.primaryColor) : null
@@ -210,6 +301,52 @@ export default function Config() {
               </div>
             )}
 
+            {/* Omni API Key + Fetch */}
+            <div className="config-section">
+              <h3><Key size={18} /> Omni API Key</h3>
+              <p style={{ fontSize: 13, color: '#64748b', marginBottom: 12, lineHeight: 1.6 }}>
+                Enter your Omni organization API key or personal access token to auto-populate dashboards and connections below.
+              </p>
+              <div className="config-grid">
+                <div className="config-field full-width">
+                  <label>API Key (from Omni Settings → API Keys)</label>
+                  <div className="config-input-row">
+                    <input
+                      type="password"
+                      value={editData.omniApiKey || ''}
+                      onChange={e => updateField('omniApiKey', e.target.value)}
+                      placeholder="Enter your Omni API key"
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none' }}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      onClick={fetchOmniData}
+                      disabled={omniLoading || !editData.omniApiKey}
+                    >
+                      {omniLoading ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />}
+                      {omniLoading ? 'Fetching...' : 'Fetch'}
+                    </button>
+                  </div>
+                </div>
+                <div className="config-field">
+                  <label>Vanity Domain (optional)</label>
+                  <input
+                    type="text"
+                    value={editData.embedVanityDomain || ''}
+                    onChange={e => updateField('embedVanityDomain', e.target.value)}
+                    placeholder="e.g. trial.embed-omniapp.co"
+                  />
+                </div>
+              </div>
+              {omniError && <p className="config-error" style={{ marginTop: 8 }}>{omniError}</p>}
+              {omniFetched && !omniError && (
+                <p style={{ fontSize: 12, color: '#10b981', marginTop: 8, fontWeight: 600 }}>
+                  <CheckCircle2 size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                  Found {dashboards.length} dashboard{dashboards.length !== 1 ? 's' : ''} and {connections.length} connection{connections.length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+
             <div className="config-section">
               <h3><MonitorDot size={18} /> Omni Embed Settings</h3>
               <div className="config-grid">
@@ -222,23 +359,29 @@ export default function Config() {
                     placeholder="32-character embed secret"
                   />
                 </div>
-                <div className="config-field">
-                  <label>Vanity Domain (optional)</label>
-                  <input
-                    type="text"
-                    value={editData.embedVanityDomain || ''}
-                    onChange={e => updateField('embedVanityDomain', e.target.value)}
-                    placeholder="e.g. trial.embed-omniapp.co"
-                  />
-                </div>
-                <div className="config-field">
+                <div className="config-field full-width">
                   <label>Dashboard Path</label>
-                  <input
-                    type="text"
-                    value={editData.embedDashboardPath || '/dashboards/d33cc8c2'}
-                    onChange={e => updateField('embedDashboardPath', e.target.value)}
-                    placeholder="/dashboards/abc123"
-                  />
+                  {dashboards.length > 0 ? (
+                    <select
+                      value={editData.embedDashboardPath || ''}
+                      onChange={e => handleDashboardSelect(e.target.value)}
+                      className="config-select"
+                    >
+                      <option value="">Select a dashboard...</option>
+                      {dashboards.map(d => (
+                        <option key={d.id} value={d.contentPath}>
+                          {d.name} ({d.contentPath})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={editData.embedDashboardPath || '/dashboards/d33cc8c2'}
+                      onChange={e => updateField('embedDashboardPath', e.target.value)}
+                      placeholder="/dashboards/abc123"
+                    />
+                  )}
                 </div>
                 <div className="config-field full-width">
                   <label>Custom Theme ID (optional — from Omni Settings → Themes)</label>
@@ -250,7 +393,7 @@ export default function Config() {
                   />
                 </div>
               </div>
-              <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 12 }}>
+              <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12 }}>
                 Omni requires a signed embed URL. Contact your Omni admin to enable embedding and generate a secret.
                 Without a secret, the Dashboard tab will show a placeholder.
               </p>
@@ -260,20 +403,35 @@ export default function Config() {
               <h3><MessageCircle size={18} /> AI Chat Settings</h3>
               <div className="config-grid">
                 <div className="config-field full-width">
-                  <label>Connection ID (from Omni Settings → Connections → select connection → Settings tab)</label>
-                  <input
-                    type="text"
-                    value={editData.aiConnectionId || ''}
-                    onChange={e => updateField('aiConnectionId', e.target.value)}
-                    placeholder="e.g. c0f12353-4817-4398-bcc0-d501e6dd2f64"
-                  />
+                  <label>Connection ID</label>
+                  {connections.length > 0 ? (
+                    <select
+                      value={editData.aiConnectionId || ''}
+                      onChange={e => handleConnectionSelect(e.target.value)}
+                      className="config-select"
+                    >
+                      <option value="">Select a connection...</option>
+                      {connections.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}{c.dialect ? ` (${c.dialect})` : ''}{c.database ? ` — ${c.database}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={editData.aiConnectionId || ''}
+                      onChange={e => updateField('aiConnectionId', e.target.value)}
+                      placeholder="e.g. c0f12353-4817-4398-bcc0-d501e6dd2f64"
+                    />
+                  )}
                 </div>
                 <div className="config-field full-width">
                   <label>Connection Role</label>
                   <select
                     value={editData.aiConnectionRole || 'RESTRICTED_QUERIER'}
                     onChange={e => updateField('aiConnectionRole', e.target.value)}
-                    style={{ padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                    className="config-select"
                   >
                     <option value="RESTRICTED_QUERIER">RESTRICTED_QUERIER (recommended)</option>
                     <option value="QUERIER">QUERIER</option>
@@ -281,7 +439,7 @@ export default function Config() {
                   </select>
                 </div>
               </div>
-              <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 12 }}>
+              <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12 }}>
                 The AI Chat tab embeds Omni's AI agent. It requires an Embed Secret (above) and a Connection ID to query data.
               </p>
             </div>

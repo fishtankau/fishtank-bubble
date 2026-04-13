@@ -13,6 +13,7 @@ const defaultBrand = {
   description: '',
   keyMessages: [],
   products: [],
+  omniApiKey: '',
   embedSecret: '',
   embedVanityDomain: '',
   embedDashboardPath: '/dashboards/d33cc8c2',
