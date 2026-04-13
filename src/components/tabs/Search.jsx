@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useBrand } from '../../context/BrandContext'
 import { MonitorDot, AlertCircle, Loader2, ExternalLink } from 'lucide-react'
-import { generateOmniTheme } from '../../utils/omniThemes'
 
 export default function SearchTab() {
   const { brand } = useBrand()
@@ -18,15 +17,13 @@ export default function SearchTab() {
     setLoading(true)
     setError('')
 
-    // Build theme payload based on user's choice
-    const themeChoice = brand.embedThemeChoice || 'none'
-    let customTheme = undefined
-    let customThemeId = undefined
-
-    if (themeChoice === 'custom' && brand.embedThemeId) {
-      customThemeId = brand.embedThemeId
-    } else if (themeChoice !== 'none' && themeChoice !== 'custom') {
-      customTheme = generateOmniTheme(themeChoice, brand.primaryColor, brand.secondaryColor)
+    // Build customTheme from brand colors
+    const customTheme = {
+      'dashboard-background': '#f8f9fa',
+      'dashboard-key-color': brand.primaryColor,
+      'dashboard-tile-border-color': `${brand.primaryColor}22`,
+      'dashboard-control-outline-color': brand.primaryColor,
+      'dashboard-tile-title-text-color': brand.secondaryColor,
     }
 
     fetch('/api/omni-embed-url', {
@@ -36,8 +33,8 @@ export default function SearchTab() {
         secret: brand.embedSecret,
         contentPath: brand.embedDashboardPath || '/dashboards/d33cc8c2',
         vanityDomain: brand.embedVanityDomain || '',
-        customTheme,
-        customThemeId,
+        customTheme: brand.embedThemeId ? undefined : customTheme,
+        customThemeId: brand.embedThemeId || undefined,
       })
     })
       .then(res => res.json())
@@ -47,7 +44,7 @@ export default function SearchTab() {
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [brand.embedSecret, brand.embedDashboardPath, brand.embedVanityDomain, brand.embedThemeChoice, brand.embedThemeId, brand.primaryColor, brand.secondaryColor])
+  }, [brand.embedSecret, brand.embedDashboardPath, brand.embedVanityDomain])
 
   if (loading) {
     return (

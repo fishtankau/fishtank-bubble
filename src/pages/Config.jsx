@@ -4,42 +4,8 @@ import { useBrand } from '../context/BrandContext'
 import { generatePalette } from '../utils/colors'
 import {
   ArrowLeft, Search, Loader2, CheckCircle2, ExternalLink,
-  Palette, MonitorDot, MessageCircle, Key, RefreshCw, Eye
+  Palette, MonitorDot, MessageCircle, Key, RefreshCw
 } from 'lucide-react'
-import { THEME_OPTIONS, generateOmniTheme } from '../utils/omniThemes'
-
-function ThemePreviewChips({ themeChoice, primaryColor, secondaryColor }) {
-  const theme = generateOmniTheme(themeChoice, primaryColor, secondaryColor)
-  if (!theme) return null
-  const bg = theme['dashboard-background']
-  const tileBg = theme['dashboard-tile-background']
-  const titleColor = theme['dashboard-tile-title-text-color']
-  const bodyColor = theme['dashboard-tile-text-body-color']
-  const borderColor = theme['dashboard-tile-border-color']
-  const keyColor = theme['dashboard-key-color']
-  return (
-    <div style={{
-      display: 'flex', gap: 8, padding: 16, borderRadius: 12,
-      background: bg, border: `1.5px solid ${borderColor}`, overflow: 'hidden',
-    }}>
-      {[1, 2, 3].map(i => (
-        <div key={i} style={{
-          flex: 1, padding: 12, borderRadius: 10,
-          background: tileBg, border: `1px solid ${borderColor}`,
-          minWidth: 0,
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: titleColor, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Tile {i}
-          </div>
-          <div style={{ fontSize: 10, color: bodyColor, lineHeight: 1.4 }}>
-            Sample data
-          </div>
-          <div style={{ width: '60%', height: 4, borderRadius: 2, background: keyColor, marginTop: 8, opacity: 0.7 }} />
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export default function Config() {
   const navigate = useNavigate()
@@ -411,57 +377,31 @@ export default function Config() {
                   )}
                 </div>
                 <div className="config-field full-width">
-                  <label>Embed Theme</label>
-                  <select
-                    value={editData.embedThemeChoice || 'none'}
-                    onChange={e => updateField('embedThemeChoice', e.target.value)}
-                    className="config-select"
-                  >
-                    {THEME_OPTIONS.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.label} — {t.description}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {editData.embedThemeChoice === 'custom' && (
-                  <div className="config-field full-width">
-                    <label>Custom Theme ID (from Omni Settings → Themes)</label>
-                    <div className="config-input-row">
-                      <input
-                        type="text"
-                        value={editData.embedThemeId || ''}
-                        onChange={e => updateField('embedThemeId', e.target.value)}
-                        placeholder="Paste theme ID from Omni"
-                        style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none' }}
-                      />
-                      {editData.embedDashboardPath && (
-                        <a
-                          href={`https://${editData.embedVanityDomain || 'trial.omniapp.co'}${editData.embedDashboardPath}/themes`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-secondary"
-                          style={{ whiteSpace: 'nowrap', textDecoration: 'none' }}
-                        >
-                          <ExternalLink size={14} /> Open Themes
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {editData.embedThemeChoice && editData.embedThemeChoice !== 'none' && editData.embedThemeChoice !== 'custom' && (
-                  <div className="config-theme-preview">
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6, display: 'block' }}>
-                      <Eye size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                      Theme Preview
-                    </label>
-                    <ThemePreviewChips
-                      themeChoice={editData.embedThemeChoice}
-                      primaryColor={editData.primaryColor}
-                      secondaryColor={editData.secondaryColor}
+                  <label>Custom Theme ID (optional)</label>
+                  <div className="config-input-row">
+                    <input
+                      type="text"
+                      value={editData.embedThemeId || ''}
+                      onChange={e => updateField('embedThemeId', e.target.value)}
+                      placeholder="Paste theme ID from Omni"
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 14, outline: 'none' }}
                     />
+                    {editData.embedDashboardPath && (
+                      <a
+                        href={`https://${editData.embedVanityDomain || 'trial.omniapp.co'}${editData.embedDashboardPath}/themes`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                        style={{ whiteSpace: 'nowrap', textDecoration: 'none' }}
+                      >
+                        <ExternalLink size={14} /> Open Themes
+                      </a>
+                    )}
                   </div>
-                )}
+                  <span style={{ fontSize: 11, color: '#94a3b8', marginTop: 4, lineHeight: 1.5 }}>
+                    Omni doesn't expose themes via API. Click "Open Themes" → select a theme → copy the ID from the URL.
+                  </span>
+                </div>
               </div>
               <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12 }}>
                 Omni requires a signed embed URL. Contact your Omni admin to enable embedding and generate a secret.
