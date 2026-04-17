@@ -114,6 +114,9 @@ export default function Config() {
       setConnections(connList)
       setOmniFetched(true)
 
+      // Save all connections to brand context so embed tabs can use them
+      updateField('allConnections', connList)
+
       // Auto-select first dashboard if none selected
       if (dashList.length > 0 && !editData.embedDashboardPath) {
         updateField('embedDashboardPath', dashList[0].contentPath)
@@ -140,7 +143,7 @@ export default function Config() {
   }
 
   const handleConnectionSelect = (connId) => {
-    updateField('aiConnectionId', connId)
+    updateField('aiConnectionId', connId === '__all__' ? '' : connId)
   }
 
   const palette = editData ? generatePalette(editData.primaryColor) : null
@@ -413,14 +416,14 @@ export default function Config() {
               <h3><MessageCircle size={18} /> AI Chat Settings</h3>
               <div className="config-grid">
                 <div className="config-field full-width">
-                  <label>Connection ID</label>
+                  <label>Connection</label>
                   {connections.length > 0 ? (
                     <select
-                      value={editData.aiConnectionId || ''}
+                      value={editData.aiConnectionId || '__all__'}
                       onChange={e => handleConnectionSelect(e.target.value)}
                       className="config-select"
                     >
-                      <option value="">Select a connection...</option>
+                      <option value="__all__">All Connections</option>
                       {connections.map(c => (
                         <option key={c.id} value={c.id}>
                           {c.name}{c.dialect ? ` (${c.dialect})` : ''}{c.database ? ` — ${c.database}` : ''}

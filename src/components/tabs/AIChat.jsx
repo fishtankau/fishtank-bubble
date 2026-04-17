@@ -8,8 +8,10 @@ export default function AIChat() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const hasConnection = brand.aiConnectionId || brand.allConnections?.length > 0
+
   useEffect(() => {
-    if (!brand.embedSecret || !brand.aiConnectionId) {
+    if (!brand.embedSecret || !hasConnection) {
       setEmbedUrl(null)
       return
     }
@@ -17,8 +19,13 @@ export default function AIChat() {
     setLoading(true)
     setError('')
 
-    const connectionRoles = {
-      [brand.aiConnectionId]: brand.aiConnectionRole || 'RESTRICTED_QUERIER'
+    const role = brand.aiConnectionRole || 'RESTRICTED_QUERIER'
+    let connectionRoles
+    if (brand.aiConnectionId) {
+      connectionRoles = { [brand.aiConnectionId]: role }
+    } else if (brand.allConnections?.length > 0) {
+      connectionRoles = {}
+      brand.allConnections.forEach(c => { connectionRoles[c.id] = role })
     }
 
     fetch('/api/omni-embed-url', {
@@ -50,7 +57,7 @@ export default function AIChat() {
     )
   }
 
-  if (!brand.embedSecret || !brand.aiConnectionId) {
+  if (!brand.embedSecret || !hasConnection) {
     return (
       <div className="embed-placeholder">
         <div className="embed-placeholder-icon" style={{ background: `${brand.primaryColor}15`, color: brand.primaryColor }}>

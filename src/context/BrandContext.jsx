@@ -20,6 +20,7 @@ const defaultBrand = {
   embedThemeId: '',
   aiConnectionId: '',
   aiConnectionRole: 'RESTRICTED_QUERIER',
+  allConnections: [],
 }
 
 export function BrandProvider({ children }) {

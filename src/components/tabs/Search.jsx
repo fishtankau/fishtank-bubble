@@ -26,10 +26,16 @@ export default function SearchTab() {
       'dashboard-tile-title-text-color': brand.secondaryColor,
     }
 
-    // Build connectionRoles if AI connection is configured (enables Dashboard Agent)
-    const connectionRoles = brand.aiConnectionId
-      ? JSON.stringify({ [brand.aiConnectionId]: brand.aiConnectionRole || 'RESTRICTED_QUERIER' })
-      : undefined
+    // Build connectionRoles — specific connection or all connections (enables Dashboard Agent)
+    let connectionRoles = undefined
+    const role = brand.aiConnectionRole || 'RESTRICTED_QUERIER'
+    if (brand.aiConnectionId) {
+      connectionRoles = JSON.stringify({ [brand.aiConnectionId]: role })
+    } else if (brand.allConnections?.length > 0) {
+      const allRoles = {}
+      brand.allConnections.forEach(c => { allRoles[c.id] = role })
+      connectionRoles = JSON.stringify(allRoles)
+    }
 
     fetch('/api/omni-embed-url', {
       method: 'POST',
