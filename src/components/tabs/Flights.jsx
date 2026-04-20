@@ -88,14 +88,6 @@ export default function Flights() {
     setError('')
     setIframeReady(false)
 
-    const customTheme = {
-      'dashboard-background': '#f8f9fa',
-      'dashboard-key-color': brand.primaryColor,
-      'dashboard-tile-border-color': `${brand.primaryColor}22`,
-      'dashboard-control-outline-color': brand.primaryColor,
-      'dashboard-tile-title-text-color': brand.secondaryColor,
-    }
-
     let connectionRoles = undefined
     const role = brand.aiConnectionRole || 'RESTRICTED_QUERIER'
     if (brand.aiConnectionId) {
@@ -113,8 +105,6 @@ export default function Flights() {
         secret: brand.embedSecret,
         contentPath: DASHBOARD_PATH,
         vanityDomain: brand.embedVanityDomain || '',
-        customTheme: brand.embedThemeId ? undefined : customTheme,
-        customThemeId: brand.embedThemeId || undefined,
         connectionRoles,
         linkAccess: '__omni_link_access_open',
       })
