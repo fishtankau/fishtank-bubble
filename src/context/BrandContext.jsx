@@ -17,7 +17,7 @@ const defaultBrand = {
   embedSecret: 'InaPfmh0m0ksEa4i6PZlmzQgnHGmZhWO',
   embedVanityDomain: '',
   embedDashboardPath: '/dashboards/d33cc8c2',
-  embedThemeId: '',
+  embedThemeId: '1d0bd701-c8e2-4c42-b5e9-b708955b05bc',
   aiConnectionId: '',
   aiConnectionRole: 'RESTRICTED_QUERIER',
   allConnections: [],
