@@ -4,19 +4,22 @@ import { useBrand } from '../context/BrandContext'
 import Overview from './tabs/Overview'
 import AIChat from './tabs/AIChat'
 import SearchTab from './tabs/Search'
-import { Sun, Moon, LogOut, Settings, LayoutDashboard, MessageCircle, MonitorDot, Sparkles } from 'lucide-react'
+import Flights from './tabs/Flights'
+import { Sun, Moon, LogOut, Settings, LayoutDashboard, MessageCircle, MonitorDot, Plane, Sparkles } from 'lucide-react'
 import { getContrastColor } from '../utils/colors'
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'aichat', label: 'AI Chat', icon: MessageCircle },
   { id: 'search', label: 'Dashboard', icon: MonitorDot },
+  { id: 'flights', label: 'Flights', icon: Plane },
 ]
 
 const tabComponents = {
   overview: Overview,
   aichat: AIChat,
   search: SearchTab,
+  flights: Flights,
 }
 
 export default function Dashboard({ onLogout }) {

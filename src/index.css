@@ -572,6 +572,93 @@ h1, h2, h3, h4, h5, h6 {
 }
 .embed-docs-link:hover { text-decoration: underline; }
 
+/* ===== Flights Tab ===== */
+.flights-tab {
+  display: flex; flex-direction: row;
+  margin: -24px -28px; height: calc(100vh - 56px - 48px);
+}
+.flights-filter-panel {
+  width: 280px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 16px; background: #fff;
+  border-right: 1.5px solid #e5e7eb;
+  overflow-y: auto;
+}
+.flights-filter-section {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.flights-filter-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.flights-filter-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px; font-weight: 600; color: #1e1b4b;
+}
+.flights-count-badge {
+  background: #6366f1; color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 10px;
+  min-width: 20px; text-align: center;
+}
+.flights-mini-clear {
+  background: transparent; border: none; cursor: pointer;
+  color: #9ca3af; padding: 4px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease;
+}
+.flights-mini-clear:hover { color: #dc2626; background: #fef2f2; }
+.flights-search-wrap { position: relative; }
+.flights-search-icon {
+  position: absolute; left: 8px; top: 50%;
+  transform: translateY(-50%); color: #9ca3af;
+  pointer-events: none;
+}
+.flights-search-input {
+  width: 100%; padding: 6px 8px 6px 26px;
+  border-radius: 8px; border: 1.5px solid #e5e7eb;
+  font-family: 'Open Sans', sans-serif; font-size: 12px;
+  background: #f9fafb; color: #374151;
+  transition: all 0.15s ease;
+}
+.flights-search-input:focus {
+  outline: none; border-color: #6366f1; background: #fff;
+}
+.flights-chip-list {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  max-height: 260px; overflow-y: auto;
+  padding: 6px; border: 1px solid #f3f4f6;
+  border-radius: 8px; background: #fafafa;
+}
+.flights-chip {
+  padding: 3px 9px; border-radius: 6px;
+  border: 1.5px solid #e5e7eb; background: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px; font-weight: 500; color: #374151;
+  cursor: pointer; transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.flights-chip:hover:not(:disabled) {
+  border-color: #a5b4fc; background: #eef2ff; color: #4338ca;
+}
+.flights-chip:focus-visible { outline: 2px solid #6366f1; outline-offset: 1px; }
+.flights-chip.active { border-color: transparent; font-weight: 600; }
+.flights-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+.flights-chip-wide { max-width: 100%; }
+.flights-loading-text { font-size: 12px; color: #9ca3af; padding: 8px; }
+.flights-clear-all-btn {
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+  padding: 8px 12px; border-radius: 8px;
+  border: 1.5px solid #fecaca; background: #fef2f2;
+  color: #dc2626; font-family: 'Poppins', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s ease;
+}
+.flights-clear-all-btn:hover {
+  background: #fee2e2; border-color: #f87171;
+}
+.flights-embed-area { flex: 1; min-height: 0; min-width: 0; }
+
 /* ===== Search Tab ===== */
 .tab-search { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
 .search-center { width: 100%; max-width: 600px; text-align: center; }

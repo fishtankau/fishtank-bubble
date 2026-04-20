@@ -194,7 +194,7 @@ app.get('/api/proxy-image', async (req, res) => {
 // Generate Omni embed signed URL via Omni's API
 app.post('/api/omni-embed-url', async (req, res) => {
   try {
-    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess } = req.body;
+    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess, filterSearchParam } = req.body;
     if (!secret || !contentPath) {
       return res.status(400).json({ error: 'secret and contentPath are required' });
     }
@@ -220,6 +220,7 @@ app.post('/api/omni-embed-url', async (req, res) => {
     if (connectionRoles) payload.connectionRoles = typeof connectionRoles === 'string' ? connectionRoles : JSON.stringify(connectionRoles);
     if (mode) payload.mode = mode;
     if (linkAccess) payload.linkAccess = linkAccess;
+    if (filterSearchParam) payload.filterSearchParam = filterSearchParam;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -290,6 +291,76 @@ app.post('/api/omni-connections', async (req, res) => {
   } catch (err) {
     console.error('Omni connections error:', err.message);
     res.status(500).json({ error: 'Failed to fetch connections: ' + err.message });
+  }
+});
+
+// Fetch dashboard filters/controls from Omni API
+app.post('/api/omni-dashboard-filters', async (req, res) => {
+  try {
+    const { apiKey, vanityDomain, dashboardId } = req.body;
+    if (!apiKey || !dashboardId) return res.status(400).json({ error: 'apiKey and dashboardId are required' });
+
+    const omniHost = vanityDomain || 'trial.omniapp.co';
+    const response = await fetch(`https://${omniHost}/api/v1/dashboards/${dashboardId}/filters`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err.message || err.error || 'Failed to fetch dashboard filters' });
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Omni dashboard filters error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch dashboard filters: ' + err.message });
+  }
+});
+
+// Run an Omni query and return distinct values for a single field as JSON
+app.post('/api/omni-query-distinct', async (req, res) => {
+  try {
+    const { apiKey, vanityDomain, modelId, table, field, limit } = req.body;
+    if (!apiKey || !modelId || !table || !field) {
+      return res.status(400).json({ error: 'apiKey, modelId, table, and field are required' });
+    }
+    const omniHost = vanityDomain || 'trial.omniapp.co';
+    const response = await fetch(`https://${omniHost}/api/v1/query/run`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        query: { modelId, table, fields: [field], limit: limit || 1000 },
+        resultType: 'json',
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err.message || err.error || 'Failed to run query' });
+    }
+
+    const data = await response.json();
+    const values = [];
+    const seen = new Set();
+    for (const row of (Array.isArray(data) ? data : [])) {
+      const v = Object.values(row)[0];
+      if (v && typeof v === 'string' && !seen.has(v)) {
+        seen.add(v);
+        values.push(v);
+      }
+    }
+    values.sort();
+    res.json({ values });
+  } catch (err) {
+    console.error('Omni query error:', err.message);
+    res.status(500).json({ error: 'Failed to run query: ' + err.message });
   }
 });
 

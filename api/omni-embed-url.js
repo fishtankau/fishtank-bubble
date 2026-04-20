@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess } = req.body;
+    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess, filterSearchParam } = req.body;
     if (!secret || !contentPath) {
       return res.status(400).json({ error: 'secret and contentPath are required' });
     }
@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     if (connectionRoles) payload.connectionRoles = typeof connectionRoles === 'string' ? connectionRoles : JSON.stringify(connectionRoles);
     if (mode) payload.mode = mode;
     if (linkAccess) payload.linkAccess = linkAccess;
+    if (filterSearchParam) payload.filterSearchParam = filterSearchParam;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
