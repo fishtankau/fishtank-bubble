@@ -4,10 +4,10 @@ const BrandContext = createContext()
 
 const defaultBrand = {
   configured: false,
-  url: '',
+  url: 'https://www.portseattle.org/sea-tac',
   name: 'Fishtank Bubble',
   logo: '',
-  logoUrl: '',
+  logoUrl: 'https://www.portseattle.org/themes/portseattleflysea/logo.svg',
   primaryColor: '#F5C518',
   secondaryColor: '#1a1a1a',
   description: '',
