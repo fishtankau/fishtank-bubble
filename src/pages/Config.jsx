@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBrand } from '../context/BrandContext'
 import { generatePalette } from '../utils/colors'
@@ -23,8 +23,9 @@ export default function Config() {
   const [connections, setConnections] = useState([])
   const [omniFetched, setOmniFetched] = useState(false)
 
-  const handleScan = async () => {
-    if (!url.trim()) return
+  const handleScan = async (urlOverride) => {
+    const targetUrl = (urlOverride ?? url).trim()
+    if (!targetUrl) return
     setLoading(true)
     setError('')
     setScanned(false)
@@ -33,25 +34,29 @@ export default function Config() {
       const res = await fetch('/api/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() })
+        body: JSON.stringify({ url: targetUrl })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Scrape failed')
 
-      setEditData(data)
+      // Merge scraped data on top of existing brand defaults so API key,
+      // embed secret, theme ID, etc. aren't wiped out.
+      setEditData(prev => ({ ...brand, ...(prev || {}), ...data }))
       setScanned(true)
     } catch (err) {
       setError(err.message)
-      setEditData({
+      setEditData(prev => ({
+        ...brand,
+        ...(prev || {}),
         name: 'My Brand',
-        url: url.trim(),
+        url: targetUrl,
         logo: '',
         primaryColor: '#2563eb',
         secondaryColor: '#1e293b',
         description: '',
         keyMessages: [],
         products: [],
-      })
+      }))
       setScanned(true)
     } finally {
       setLoading(false)
@@ -127,6 +132,28 @@ export default function Config() {
       setOmniLoading(false)
     }
   }, [editData?.omniApiKey, editData?.embedVanityDomain])
+
+  // Auto-scan on mount if we have a default URL and haven't scanned yet
+  const autoScanStarted = useRef(false)
+  useEffect(() => {
+    if (autoScanStarted.current) return
+    if (scanned || loading) return
+    if (!url.trim()) return
+    autoScanStarted.current = true
+    handleScan(url)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-fetch Omni data once we have an API key and scan has completed
+  const autoOmniStarted = useRef(false)
+  useEffect(() => {
+    if (autoOmniStarted.current) return
+    if (!scanned || !editData?.omniApiKey) return
+    if (omniLoading || omniFetched) return
+    autoOmniStarted.current = true
+    fetchOmniData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scanned, editData?.omniApiKey])
 
   const handleSave = () => {
     if (!editData) return
