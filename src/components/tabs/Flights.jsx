@@ -23,9 +23,17 @@ export default function Flights() {
   const iframeRef = useRef(null)
   const embedOriginRef = useRef(null)
 
-  // Fetch distinct airports and carriers from Omni
+  // Fetch distinct airports and carriers from Omni, scoped to the
+  // logged-in user's region so the filter panel only shows relevant values.
   useEffect(() => {
     if (!brand.omniApiKey) return
+
+    // Build a region filter matching the access filter on the topic.
+    // `all` users (admin) see every value; everyone else is scoped.
+    const region = currentUser?.region
+    const regionFilter = (region && region !== 'all')
+      ? { [`${TOPIC}.airport_region`]: { is: region } }
+      : undefined
 
     const fetchValues = async (field, setter) => {
       try {
@@ -39,6 +47,7 @@ export default function Flights() {
             table: TOPIC,
             field,
             limit: 500,
+            filters: regionFilter,
           })
         })
         const data = await res.json()
@@ -50,7 +59,7 @@ export default function Flights() {
 
     fetchValues(`${TOPIC}.airport`, setAirports)
     fetchValues(`${TOPIC}.carrier_name`, setCarriers)
-  }, [brand.omniApiKey, brand.embedVanityDomain])
+  }, [brand.omniApiKey, brand.embedVanityDomain, currentUser?.region])
 
   // Parse origin from embed URL for postMessage
   useEffect(() => {

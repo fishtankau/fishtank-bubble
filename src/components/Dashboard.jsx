@@ -84,7 +84,7 @@ export default function Dashboard({ onLogout }) {
               className="dashboard-user-badge"
               title={`Logged in as ${currentUser.email || currentUser.externalId} — region: ${currentUser.region}`}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
+                display: 'flex', alignItems: 'center',
                 padding: '4px 10px', borderRadius: 999,
                 background: `${brand.primaryColor}15`,
                 border: `1px solid ${brand.primaryColor}33`,
@@ -92,12 +92,7 @@ export default function Dashboard({ onLogout }) {
                 whiteSpace: 'nowrap',
               }}
             >
-              <span>{currentUser.name}</span>
-              <span style={{
-                padding: '1px 7px', borderRadius: 999,
-                background: brand.primaryColor, color: activeBtnText,
-                fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5,
-              }}>{currentUser.region}</span>
+              {currentUser.name}
             </div>
           )}
           <button
