@@ -194,7 +194,7 @@ app.get('/api/proxy-image', async (req, res) => {
 // Generate Omni embed signed URL via Omni's API
 app.post('/api/omni-embed-url', async (req, res) => {
   try {
-    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess, filterSearchParam } = req.body;
+    const { secret, contentPath, vanityDomain, customTheme, customThemeId, prefersDark, theme, connectionRoles, mode, linkAccess, filterSearchParam, externalId, name, userAttributes } = req.body;
     if (!secret || !contentPath) {
       return res.status(400).json({ error: 'secret and contentPath are required' });
     }
@@ -206,11 +206,17 @@ app.post('/api/omni-embed-url', async (req, res) => {
     const apiUrl = `https://${omniHost}/embed/sso/generate-url`;
     const payload = {
       contentPath,
-      externalId: 'fishtank-user-1',
-      name: 'Fishtank User',
+      externalId: externalId || 'fishtank-user-1',
+      name: name || 'Fishtank User',
       nonce,
       secret,
     };
+
+    if (userAttributes && typeof userAttributes === 'object' && Object.keys(userAttributes).length > 0) {
+      payload.userAttributes = encodeURIComponent(JSON.stringify(userAttributes));
+    } else if (typeof userAttributes === 'string' && userAttributes) {
+      payload.userAttributes = userAttributes;
+    }
 
     // Add optional params
     if (customThemeId) payload.customThemeId = customThemeId;

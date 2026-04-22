@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useBrand } from '../context/BrandContext'
 import { generatePalette, getContrastColor } from '../utils/colors'
+import { resolveUser } from '../utils/userAttributes'
 import { Sparkles } from 'lucide-react'
 
 export default function Login({ onLogin }) {
-  const { brand } = useBrand()
+  const { brand, setCurrentUser } = useBrand()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [logoFailed, setLogoFailed] = useState(false)
@@ -13,7 +14,9 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onLogin()
+    const user = resolveUser(username)
+    setCurrentUser(user)
+    onLogin(user)
   }
 
   const rawLogo = brand.logoUrl || brand.logo

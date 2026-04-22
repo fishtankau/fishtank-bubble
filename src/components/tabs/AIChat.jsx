@@ -3,7 +3,7 @@ import { useBrand } from '../../context/BrandContext'
 import { MessageCircle, AlertCircle, Loader2, ExternalLink } from 'lucide-react'
 
 export default function AIChat() {
-  const { brand } = useBrand()
+  const { brand, currentUser } = useBrand()
   const [embedUrl, setEmbedUrl] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,6 +37,9 @@ export default function AIChat() {
         vanityDomain: brand.embedVanityDomain || '',
         connectionRoles,
         mode: 'SINGLE_CONTENT',
+        externalId: currentUser?.externalId,
+        name: currentUser?.name,
+        userAttributes: currentUser?.userAttributes,
       })
     })
       .then(res => res.json())
@@ -46,7 +49,7 @@ export default function AIChat() {
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [brand.embedSecret, brand.embedVanityDomain, brand.aiConnectionId, brand.aiConnectionRole])
+  }, [brand.embedSecret, brand.embedVanityDomain, brand.aiConnectionId, brand.aiConnectionRole, currentUser?.externalId])
 
   if (loading) {
     return (

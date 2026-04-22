@@ -3,7 +3,7 @@ import { useBrand } from '../../context/BrandContext'
 import { MonitorDot, AlertCircle, Loader2, ExternalLink } from 'lucide-react'
 
 export default function SearchTab() {
-  const { brand } = useBrand()
+  const { brand, currentUser } = useBrand()
   const [embedUrl, setEmbedUrl] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -48,6 +48,9 @@ export default function SearchTab() {
         customThemeId: brand.embedThemeId || undefined,
         connectionRoles,
         linkAccess: '__omni_link_access_open',
+        externalId: currentUser?.externalId,
+        name: currentUser?.name,
+        userAttributes: currentUser?.userAttributes,
       })
     })
       .then(res => res.json())
@@ -57,7 +60,7 @@ export default function SearchTab() {
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [brand.embedSecret, brand.embedDashboardPath, brand.embedVanityDomain])
+  }, [brand.embedSecret, brand.embedDashboardPath, brand.embedVanityDomain, currentUser?.externalId])
 
   if (loading) {
     return (

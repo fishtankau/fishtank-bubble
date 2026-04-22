@@ -25,6 +25,7 @@ const defaultBrand = {
 
 export function BrandProvider({ children }) {
   const [brand, setBrand] = useState(defaultBrand)
+  const [currentUser, setCurrentUser] = useState(null)
 
   const updateBrand = (data) => {
     setBrand(prev => ({ ...prev, ...data, configured: true }))
@@ -33,7 +34,7 @@ export function BrandProvider({ children }) {
   const resetBrand = () => setBrand(defaultBrand)
 
   return (
-    <BrandContext.Provider value={{ brand, updateBrand, resetBrand }}>
+    <BrandContext.Provider value={{ brand, updateBrand, resetBrand, currentUser, setCurrentUser }}>
       {children}
     </BrandContext.Provider>
   )

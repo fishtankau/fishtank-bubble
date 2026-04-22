@@ -9,7 +9,7 @@ const MODEL_ID = '5662aa63-3e2e-4ec5-b678-5cc274e45980'
 const TOPIC = 'demo__airline_delay_cause'
 
 export default function Flights() {
-  const { brand } = useBrand()
+  const { brand, currentUser } = useBrand()
   const [embedUrl, setEmbedUrl] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -107,6 +107,9 @@ export default function Flights() {
         vanityDomain: brand.embedVanityDomain || '',
         connectionRoles,
         linkAccess: '__omni_link_access_open',
+        externalId: currentUser?.externalId,
+        name: currentUser?.name,
+        userAttributes: currentUser?.userAttributes,
       })
     })
       .then(res => res.json())
@@ -116,11 +119,11 @@ export default function Flights() {
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [brand])
+  }, [brand, currentUser])
 
   useEffect(() => {
     fetchEmbedUrl()
-  }, [brand.embedSecret, brand.embedVanityDomain])
+  }, [brand.embedSecret, brand.embedVanityDomain, currentUser?.externalId])
 
   // Send filter update to Omni iframe
   const sendFilterUpdate = useCallback((airportList, carrierList) => {
