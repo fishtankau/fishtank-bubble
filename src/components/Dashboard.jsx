@@ -79,22 +79,6 @@ export default function Dashboard({ onLogout }) {
             })}
           </nav>
         <div className="dashboard-header-actions">
-          {currentUser && (
-            <div
-              className="dashboard-user-badge"
-              title={`Logged in as ${currentUser.email || currentUser.externalId} — region: ${currentUser.region}`}
-              style={{
-                display: 'flex', alignItems: 'center',
-                padding: '4px 10px', borderRadius: 999,
-                background: `${brand.primaryColor}15`,
-                border: `1px solid ${brand.primaryColor}33`,
-                fontSize: 12, fontWeight: 600, color: brand.secondaryColor,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {currentUser.name}
-            </div>
-          )}
           <button
             className="btn-icon"
             onClick={() => setDarkMode(!darkMode)}
