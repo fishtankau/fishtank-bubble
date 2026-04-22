@@ -50,6 +50,7 @@ export default function SearchTab() {
         linkAccess: '__omni_link_access_open',
         externalId: currentUser?.externalId,
         name: currentUser?.name,
+        email: currentUser?.email,
         userAttributes: currentUser?.userAttributes,
       })
     })

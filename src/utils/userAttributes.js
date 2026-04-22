@@ -28,10 +28,14 @@ export function resolveUser(rawId) {
   const region = matched?.region || 'other'
   const name = matched?.name || (id ? id.split('@')[0] : 'Guest')
   const externalId = id || 'guest'
+  // Omni's SSO populates the `omni_user_email` system attribute from this.
+  // Ensure it's always a valid-looking email so downstream filters using
+  // system attributes don't choke on a bare username.
+  const email = id.includes('@') ? id : `${(id || 'guest').replace(/[^a-z0-9._-]/g, '')}@fishtank.local`
 
   return {
     externalId,
-    email: id,
+    email,
     name,
     region,
     isAdmin: region === 'all',

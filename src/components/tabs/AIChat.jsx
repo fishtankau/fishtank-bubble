@@ -39,6 +39,7 @@ export default function AIChat() {
         mode: 'SINGLE_CONTENT',
         externalId: currentUser?.externalId,
         name: currentUser?.name,
+        email: currentUser?.email,
         userAttributes: currentUser?.userAttributes,
       })
     })
