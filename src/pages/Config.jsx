@@ -23,6 +23,10 @@ export default function Config() {
   const [connections, setConnections] = useState([])
   const [omniFetched, setOmniFetched] = useState(false)
 
+  // User attribute check state
+  const [attrStatus, setAttrStatus] = useState(null) // null | 'checking' | 'exists' | 'missing' | 'error'
+  const [attrMessage, setAttrMessage] = useState('')
+
   const handleScan = async (urlOverride) => {
     const targetUrl = (urlOverride ?? url).trim()
     if (!targetUrl) return
@@ -171,6 +175,42 @@ export default function Config() {
 
   const handleConnectionSelect = (connId) => {
     updateField('aiConnectionId', connId === '__all__' ? '' : connId)
+  }
+
+  const checkAirportRegionAttr = async () => {
+    if (!editData?.omniApiKey) {
+      setAttrStatus('error')
+      setAttrMessage('Enter an Omni API key first')
+      return
+    }
+    setAttrStatus('checking')
+    setAttrMessage('')
+    try {
+      const res = await fetch('/api/omni-user-attributes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: editData.omniApiKey,
+          vanityDomain: editData.embedVanityDomain || '',
+          name: 'airport_region',
+          type: 'string',
+        }),
+      })
+      const data = await res.json()
+      if (data.exists) {
+        setAttrStatus('exists')
+        setAttrMessage('airport_region user attribute is configured in Omni.')
+      } else if (data.created) {
+        setAttrStatus('exists')
+        setAttrMessage('Created airport_region via API.')
+      } else {
+        setAttrStatus('missing')
+        setAttrMessage(data.instructions || data.error || 'Attribute is missing.')
+      }
+    } catch (err) {
+      setAttrStatus('error')
+      setAttrMessage(err.message)
+    }
   }
 
   const palette = editData ? generatePalette(editData.primaryColor) : null
@@ -437,6 +477,49 @@ export default function Config() {
                 Omni requires a signed embed URL. Contact your Omni admin to enable embedding and generate a secret.
                 Without a secret, the Dashboard tab will show a placeholder.
               </p>
+            </div>
+
+            <div className="config-section">
+              <h3><Key size={18} /> User Attribute — airport_region</h3>
+              <p style={{ fontSize: 13, color: '#64748b', marginBottom: 12, lineHeight: 1.6 }}>
+                Logins route to an <code>airport_region</code> user attribute
+                (<strong>all</strong>, <strong>east</strong>, <strong>west</strong>, <strong>other</strong>)
+                which drives Omni's access filter on the flights topic.
+                Omni doesn't allow creating user attributes via API — only listing.
+              </p>
+              <div className="config-input-row">
+                <button
+                  className="btn btn-secondary"
+                  onClick={checkAirportRegionAttr}
+                  disabled={attrStatus === 'checking' || !editData.omniApiKey}
+                >
+                  {attrStatus === 'checking' ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />}
+                  Check status
+                </button>
+                <a
+                  href={`https://${editData.embedVanityDomain || 'trial.omniapp.co'}/settings/attributes`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                  style={{ whiteSpace: 'nowrap', textDecoration: 'none' }}
+                >
+                  <ExternalLink size={14} /> Open Attributes in Omni
+                </a>
+              </div>
+              {attrStatus === 'exists' && (
+                <p style={{ fontSize: 13, color: '#10b981', marginTop: 10, fontWeight: 600 }}>
+                  <CheckCircle2 size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                  {attrMessage}
+                </p>
+              )}
+              {attrStatus === 'missing' && (
+                <p style={{ fontSize: 13, color: '#d97706', marginTop: 10, lineHeight: 1.5 }}>
+                  {attrMessage}
+                </p>
+              )}
+              {attrStatus === 'error' && (
+                <p className="config-error" style={{ marginTop: 10 }}>{attrMessage}</p>
+              )}
             </div>
 
             <div className="config-section">

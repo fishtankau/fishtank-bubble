@@ -10,6 +10,7 @@
     { "source": "/api/omni-connections", "destination": "/api/omni-connections" },
     { "source": "/api/omni-dashboard-filters", "destination": "/api/omni-dashboard-filters" },
     { "source": "/api/omni-query-distinct", "destination": "/api/omni-query-distinct" },
+    { "source": "/api/omni-user-attributes", "destination": "/api/omni-user-attributes" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
