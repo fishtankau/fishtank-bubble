@@ -30,9 +30,19 @@ export default function Flights() {
 
     // Build a region filter matching the access filter on the topic.
     // `all` users (admin) see every value; everyone else is scoped.
+    // The query/run API wants the full filter object (not the {is: ...}
+    // shorthand which only works in some contexts).
     const region = currentUser?.region
     const regionFilter = (region && region !== 'all')
-      ? { [`${TOPIC}.airport_region`]: { is: region } }
+      ? {
+          [`${TOPIC}.airport_region`]: {
+            kind: 'EQUALS',
+            values: [region],
+            is_negative: false,
+            is_inclusive: false,
+            type: 'string',
+          }
+        }
       : undefined
 
     const fetchValues = async (field, setter) => {
@@ -51,9 +61,15 @@ export default function Flights() {
           })
         })
         const data = await res.json()
+        if (data.error) {
+          console.error('[Flights] distinct query error:', field, data.error)
+          setter([])
+          return
+        }
         if (data.values) setter(data.values)
       } catch (err) {
         console.error('[Flights] fetch values failed:', field, err)
+        setter([])
       }
     }
 
